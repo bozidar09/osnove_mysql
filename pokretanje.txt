@@ -1,0 +1,24 @@
+mysql -u bozidar -p
+sifra: bozidar
+
+izlistaj sve baze podataka:
+SHOW DATABASES;
+
+MySql - relacijska baza podataka
+
+SQL -> structured query language
+    -> temelji se na odnosu entitet - relacija
+
+DBMS -> database management system
+
+ER dijagram - dijagram entiteta i relacija
+
+3 vrste relacija:
+1-1 (one to one)  ->  proizvod - garantni list
+1-n / n-1 (one to many)  ->  proizvod - slika
+n-m (many to many)  ->  kosarica - proizvod
+
+CREATE DATABASE tvrtka;  (ključne riječi velika slova, naši podatci mala slova)
+CREATE DATABASE IF NOT EXIST tvrtka DEFAUL CHARACTER SET utf8 COLLATE utf8_general_ci;  (kreiranje baze podataka ako ne postoji uz definiranje specijalnih hrvatskih znakova)
+
+USE tvrtka;

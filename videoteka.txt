@@ -1,0 +1,7 @@
+GRAD - id, ime, postanski_broj
+CLAN - id, ime, prezime, oib, broj_telefona, email, adresa, id_grad
+FILM - id, naziv, zanr
+CJENIK - id_cjenik, tip, cijena, medij
+POSUDBA - id, clan_id, film_id, cjenik_id, datum_posudbe
+MEDIJ - id, naziv
+KOLICINA - id, film_id, medij_id, kolicina
