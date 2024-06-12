@@ -3,5 +3,5 @@ CLAN - id, ime, prezime, oib, broj_telefona, email, adresa, id_grad
 FILM - id, naziv, zanr
 MEDIJ - id, naziv
 CJENIK - id_cjenik, tip, cijena, medij_id
-KOLICINA - id, film_id, medij_id, kolicina
+ZALIHA - id, film_id, medij_id, kolicina
 POSUDBA - id, clan_id, film_id, cjenik_id, datum_posudbe
