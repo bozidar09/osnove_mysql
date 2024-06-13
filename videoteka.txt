@@ -1,6 +1,7 @@
 GRAD - id, ime, postanski_broj
-CLAN - id, ime, prezime, oib, broj_telefona, email, adresa, id_grad
-FILM - id, naziv, zanr
+CLAN - id, ime, prezime, datum, oib, broj_telefona, email, adresa, grad_id
+ZANR - id, naziv
+FILM - id, naziv, zanr_id
 MEDIJ - id, naziv
 CJENIK - id_cjenik, tip, cijena, medij_id
 ZALIHA - id, film_id, medij_id, kolicina
