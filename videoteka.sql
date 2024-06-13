@@ -65,5 +65,7 @@ CREATE TABLE IF NOT EXISTS posudba (
     FOREIGN KEY (film_id) REFERENCES film(id),
     cjenik_id INT UNSIGNED NOT NULL,
     FOREIGN KEY (cjenik_id) REFERENCES cjenik(id),
+    medij_id INT UNSIGNED NOT NULL,
+    FOREIGN KEY (medij_id) REFERENCES medij(id),
     datum DATETIME NOT NULL
 ) ENGINE=InnoDB;
