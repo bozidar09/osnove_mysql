@@ -121,5 +121,23 @@ INSERT INTO posudbe (clan_id, kopija_id, datum_posudbe) VALUES (1, 3, '2023-06-0
 ### Zadaca:
 #### Napraviti Upite na bazi podataka "knjiznica"
 1. Navedite sve članove koji su posudili knjige, zajedno s naslovima knjiga koje su posudili.
+SELECT c.ime, knj.naslov
+    FROM posudbe p
+    JOIN clanovi c ON c.id = clan_id
+    JOIN kopija kp ON kp.id = kopija_id
+    JOIN knjige knj ON knj.id = knjiga_id
+    WHERE p.datum_povrata IS NULL; -- dodatak da se pronađu oni kod kojih su još uvijek posuđene knjige
+
 2. Pronađite članove koji imaju zakašnjele knjige.
+-- problem je što dužina posudbe i točna zakasnina po danu nisu definirane u bazi, no možemo izračunati koliko dugo pojedinci nisu vratili knjige
+SELECT c.ime, p.datum_posudbe, DATEDIFF (CURDATE(), p.datum_posudbe) AS 'dužina posudbe'
+    FROM posudbe p
+    JOIN clanovi c ON c.id = clan_id
+    WHERE p.datum_povrata IS NULL; -- gledamo samo one koji još nisu vratili knjige
+
 3. Pronađite sve žanrove i broj dostupnih knjiga u svakom žanru.
+SELECT z.id, z.naziv, SUM(kp.dostupna) AS "broj dostupnih knjiga"
+    FROM kopija kp
+    JOIN knjige knj ON knj.id = knjiga_id
+    JOIN zanrovi z ON z.id = zanr_id
+    GROUP BY z.id;
