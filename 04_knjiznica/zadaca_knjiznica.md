@@ -137,7 +137,7 @@ SELECT c.ime, knj.naslov
 
 -- 2.zadatak 
 -- problem je što dužina posudbe i točna zakasnina po danu nisu definirane u bazi, no možemo izračunati koliko dugo pojedinci nisu vratili knjige)
-SELECT c.ime, p.datum_posudbe, DATEDIFF (CURDATE(), p.datum_posudbe) AS 'dužina posudbe'
+SELECT c.ime, p.datum_posudbe, DATEDIFF(CURDATE(), p.datum_posudbe) AS 'dužina posudbe'
     FROM posudbe p
     JOIN clanovi c ON c.id = clan_id
     WHERE p.datum_povrata IS NULL; -- gledamo samo one koji još nisu vratili knjige
