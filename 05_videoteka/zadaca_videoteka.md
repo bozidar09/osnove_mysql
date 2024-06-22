@@ -43,7 +43,7 @@ CREATE VIEW kolicina AS
 
 - Clan od jednom moze posuditi vise od jednog filma
 
-- 1.način (view 'racun')
+    - 1.način (view 'racun')
 ```sql
 -- stvaranje računa putem table view-a kako bi dobili ispis posuđenih filmova za određenog člana i točno određeni dan
 CREATE VIEW racun AS
@@ -60,7 +60,7 @@ CREATE VIEW racun AS
         WHERE cl.id = 1 AND p.datum_posudbe = CURDATE()
 ```
 
-- 2.način (vezna tablica 'primjerci')
+    - 2.način (vezna tablica 'primjerci')
 ```sql
 -- brisanje stranog ključa 'zaliha_id', te "datum_povrata" iz tablice 'posudba' (u konačnici prebacujemo te atribute/stupce u veznu tablicu)
 ALTER TABLE posudba DROP FOREIGN KEY posudba_ibfk_2;  -- strani ključ 'zaliha_id' koji je referenciran na zaliha(id)
