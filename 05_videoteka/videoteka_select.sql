@@ -151,3 +151,14 @@ SELECT c.*, DATEDIFF(p.datum_povrata, p.datum_posudbe) - 1 AS "zakasnina"
     FROM posudba p
     JOIN clanovi c ON c.id = p.clan_id
     WHERE DATEDIFF(p.datum_povrata, p.datum_posudbe) > 1 OR DATEDIFF(IFNULL(p.datum_povrata, CURDATE()), p.datum_posudbe) > 1; -- drugi način sa IFNULL() funkcijom
+
+-- dohvati zapise iz filmova, preskoči prva 2 zapisa, dohvati sveukupno 3 zapisa
+SELECT * FROM filmovi LIMIT 2 OFFSET 3;  -- može i sa LIMIT 3, 2 -> obrnuto je kod korištenja sa zarezom
+
+-- dohvati prosječnu cijenu filmova s obzirom na ukupnu zalihu filmova
+
+
+-- if klauzula
+SELECT *, IF (dostupna = TRUE, 'dostupna', 'nema je') AS dostupna
+    FROM kopija;
+

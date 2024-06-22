@@ -128,7 +128,7 @@ INSERT INTO posudbe (clan_id, kopija_id, datum_posudbe) VALUES (1, 3, '2023-06-0
 ```sql
 
 -- 1.zadatak
-SELECT c.ime, knj.naslov
+SELECT c.ime, knj.naslov -- treba CONCAT() za spajanje imena i prezimena, ne može +
     FROM posudbe p
     JOIN clanovi c ON c.id = clan_id
     JOIN kopija kp ON kp.id = kopija_id
@@ -143,10 +143,11 @@ SELECT c.ime, p.datum_posudbe, DATEDIFF(CURDATE(), p.datum_posudbe) AS 'dužina 
     WHERE p.datum_povrata IS NULL; -- gledamo samo one koji još nisu vratili knjige
 
 -- 3.zadatak
-SELECT z.id, z.naziv, SUM(kp.dostupna) AS "broj dostupnih knjiga"
+SELECT z.id, z.naziv, COUNT(*) AS "broj dostupnih knjiga"
     FROM kopija kp
     JOIN knjige knj ON knj.id = knjiga_id
     JOIN zanrovi z ON z.id = zanr_id
+    WHERE kp.dostupna = TRUE
     GROUP BY z.id;
 
 ```
