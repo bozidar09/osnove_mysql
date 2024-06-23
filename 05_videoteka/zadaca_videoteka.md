@@ -69,7 +69,7 @@ CREATE VIEW racun AS
 
 -- 2.način (vezna tablica 'primjerci')
 
--- brisanje stranog ključa 'zaliha_id', te "datum_povrata" iz tablice 'posudba' (u konačnici prebacujemo te atribute/stupce u veznu tablicu)
+-- brisanje stranog ključa 'zaliha_id', te 'datum_povrata' iz tablice 'posudba' (u konačnici prebacujemo te atribute/stupce u veznu tablicu)
 ALTER TABLE posudba DROP FOREIGN KEY posudba_ibfk_2;  -- strani ključ 'zaliha_id' koji je referenciran na zaliha(id)
 ALTER TABLE posudba DROP COLUMN zaliha_id;
 ALTER TABLE posudba DROP COLUMN datum_povrata;
@@ -83,5 +83,21 @@ CREATE TABLE IF NOT EXISTS primjerci (
     FOREIGN KEY (zaliha_id) REFERENCES zaliha(id),
     datum_povrata DATE
 )ENGINE=InnoDB;
+
+-- stvaranje okidača gdje mijenjamo status stupca 'dostupno' iz 1 u 0 u tablici 'zaliha' ako je film sa tim serijskim brojem posuđen (nalazi se u tablici primjerci i datum_povrata je NULL) 
+CREATE TRIGGER insert_dostupno
+    AFTER INSERT ON primjerci
+    FOR EACH ROW
+        WHEN (primjerci.datum_povrata IS NULL)
+            (UPDATE zaliha SET dostupno = 0
+                WHERE zaliha.id = primjerci.zaliha_id);
+
+-- stvaranje okidača gdje mijenjamo status stupca 'dostupno' iz 0 u 1 u tablici 'zaliha' nakon što je film sa tim serijskim brojem vraćen (nalazi se u tablici primjerci i datum_povrata postoji, nije NULL) 
+CREATE TRIGGER update_dostupno
+    AFTER UPDATE ON primjerci
+    FOR EACH ROW
+        WHEN (primjerci.datum_povrata IS NOT NULL)
+            (UPDATE zaliha SET dostupno = 1
+                WHERE zaliha.id = primjerci.zaliha_id);
 
 ```
