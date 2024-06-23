@@ -10,6 +10,7 @@
 - Kreirajte novog korisnika u MySQL-u i dajte mu povlastice samo za bazu videoteka
 
 ```sql
+
 -- kreiranje novog korisnika 'algebra'
 CREATE USER 'algebra'@'localhost' IDENTIFIED BY 'algebra';
 -- davanje svih povlastica za bazu '03_videoteka'
@@ -18,6 +19,7 @@ GRANT ALL PRIVILEGES ON '03_videoteka' TO 'algebra'@'localhost';
 REVOKE ALL PRIVILEGES ON '03_videoteka' FROM 'algebra'@'localhost';
 -- brisanje korisnika 'algebra'
 DROP USER 'algebra'@'localhost';
+
 ```
 
 
@@ -25,6 +27,7 @@ DROP USER 'algebra'@'localhost';
 - Svaka fizicka kopija filma ima svoj jedinstveni identifikacijski broj (serial number) kako bi se mogla pratiti
 
 ```sql
+
 -- u tablici 'zaliha' mijenjamo stupac 'kolicina' u 'dostupno' 
 ALTER TABLE 'zaliha' CHANGE 'kolicina' 'dostupno' TINYINT(1) NOT NULL;
 -- dodajemo stupac 'serijski_broj' u tablicu 'zaliha' (nakon ovoga bi se u bazu morala ubaciti svaka pojedina kopija filma sa vlastitim serijskim brojem)
@@ -38,13 +41,16 @@ CREATE VIEW kolicina AS
         JOIN mediji ON m.id = z.medij_id
         WHERE z.dostupno = TRUE  -- filtriramo samo one kombinacije film-medij koji su dostupni
         GROUP BY f.id, m.tip;  -- grupiramo po filmu i tipu medija
+
 ```
 
 
 - Clan od jednom moze posuditi vise od jednog filma
 
-    - 1.način (view 'racun')
 ```sql
+
+-- 1.način (view 'racun')
+
 -- stvaranje računa putem table view-a kako bi dobili ispis posuđenih filmova za određenog člana i točno određeni dan
 CREATE VIEW racun AS
     SELECT cl.id, cl.clanski_broj, cl.ime, f.naslov, m.tip, cj.cijena, p.datum_posudbe
@@ -58,10 +64,11 @@ CREATE VIEW racun AS
 
 -- umjesto GROUP BY (gdje dobijemo popis svih posudbi grupiranih po članovima i danu) mogla bi se dodati WHERE klauzula sa uvjetom točno određenog člana i tekućeg dana, primjerice
         WHERE cl.id = 1 AND p.datum_posudbe = CURDATE()
-```
 
-    - 2.način (vezna tablica 'primjerci')
-```sql
+
+
+-- 2.način (vezna tablica 'primjerci')
+
 -- brisanje stranog ključa 'zaliha_id', te "datum_povrata" iz tablice 'posudba' (u konačnici prebacujemo te atribute/stupce u veznu tablicu)
 ALTER TABLE posudba DROP FOREIGN KEY posudba_ibfk_2;  -- strani ključ 'zaliha_id' koji je referenciran na zaliha(id)
 ALTER TABLE posudba DROP COLUMN zaliha_id;
