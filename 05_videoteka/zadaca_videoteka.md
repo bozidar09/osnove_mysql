@@ -13,10 +13,12 @@
 
 -- kreiranje novog korisnika 'algebra'
 CREATE USER 'algebra'@'localhost' IDENTIFIED BY 'algebra';
--- davanje svih povlastica za bazu '03_videoteka'
-GRANT ALL PRIVILEGES ON '03_videoteka' TO 'algebra'@'localhost';
--- micanje svih povlastica korisniku 'algebra' 
-REVOKE ALL PRIVILEGES ON '03_videoteka' FROM 'algebra'@'localhost';
+-- davanje svih povlastica za bazu '02_videoteka'
+GRANT ALL PRIVILEGES ON '02_videoteka' TO 'algebra'@'localhost';
+-- reload/osvježavanje tablice privilegija
+FLUSH PRIVILEGES;
+-- micanje svih povlastica za bazu korisniku 'algebra' 
+REVOKE ALL PRIVILEGES ON '02_videoteka' FROM 'algebra'@'localhost';
 -- brisanje korisnika 'algebra'
 DROP USER 'algebra'@'localhost';
 
@@ -88,16 +90,18 @@ CREATE TABLE IF NOT EXISTS primjerci (
 CREATE TRIGGER insert_dostupno
     AFTER INSERT ON primjerci
     FOR EACH ROW
-        WHEN (primjerci.datum_povrata IS NULL)
+        IF (primjerci.datum_povrata IS NULL) THEN
             (UPDATE zaliha SET dostupno = 0
                 WHERE zaliha.id = primjerci.zaliha_id);
+        END IF;
 
 -- stvaranje okidača gdje mijenjamo status stupca 'dostupno' iz 0 u 1 u tablici 'zaliha' nakon što je film sa tim serijskim brojem vraćen (nalazi se u tablici primjerci i datum_povrata postoji, nije NULL) 
 CREATE TRIGGER update_dostupno
     AFTER UPDATE ON primjerci
     FOR EACH ROW
-        WHEN (primjerci.datum_povrata IS NOT NULL)
+        IF (primjerci.datum_povrata IS NOT NULL) THEN
             (UPDATE zaliha SET dostupno = 1
                 WHERE zaliha.id = primjerci.zaliha_id);
+        END IF;
 
 ```

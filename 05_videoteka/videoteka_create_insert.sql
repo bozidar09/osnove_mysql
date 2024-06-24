@@ -43,24 +43,31 @@ CREATE TABLE IF NOT EXISTS clanovi (
     clanski_broj CHAR(14) NOT NULL UNIQUE
 )ENGINE=InnoDB;
 
-CREATE TABLE IF NOT EXISTS zaliha (
+CREATE TABLE IF NOT EXISTS kopija (
     id INT UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    barcode VARCHAR(50) NOT NULL,
+    dostupan BOOLEAN DEFAULT TRUE,
     film_id INT UNSIGNED NOT NULL,
     FOREIGN KEY (film_id) REFERENCES filmovi(id),
     medij_id INT UNSIGNED NOT NULL,
     FOREIGN KEY (medij_id) REFERENCES mediji(id),
-    kolicina INT NOT NULL
-)ENGINE=InnoDB;
+    UNIQUE(id, barcode)
+) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS posudba (
     id INT UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
     datum_posudbe DATE NOT NULL,
     datum_povrata DATE,
     clan_id INT UNSIGNED NOT NULL,
-    FOREIGN KEY (clan_id) REFERENCES clanovi(id),
-    zaliha_id INT UNSIGNED NOT NULL,
-    FOREIGN KEY (zaliha_id) REFERENCES zaliha(id)
+    FOREIGN KEY (clan_id) REFERENCES clanovi(id)
 )ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS posudba_kopija (
+    posudba_id INT UNSIGNED NOT NULL,
+    kopija_id INT UNSIGNED NOT NULL,
+    FOREIGN KEY (posudba_id) REFERENCES posudba(id),
+    FOREIGN KEY (kopija_id) REFERENCES kopija(id)
+) ENGINE=InnoDB;
 
 INSERT INTO zanrovi (ime) VALUES 
 ('Akcija'), 
@@ -86,15 +93,19 @@ INSERT INTO filmovi (naslov, godina, zanr_id, cjenik_id) VALUES
 ('Titanic', '1997', 5, 3),
 ('Matrix', '1999', 1, 1);
 
-INSERT INTO zaliha (film_id, medij_id, kolicina) VALUES 
-(1, 1, 5), 
-(1, 2, 2),
-(1, 3, 12),
-(2, 3, 3), 
-(3, 1, 10),
-(3, 2, 20),
-(4, 2, 4),
-(5, 1, 6);
+INSERT INTO kopija (barcode, dostupan, film_id, medij_id)
+VALUES 
+('INCEPTDVD', TRUE, 1, 1),
+('INCEPTDVD', TRUE, 1, 1),
+('INCEPTDVD', TRUE, 1, 1),
+('INCEPTBLURAY', TRUE, 1, 2),
+('INCEPTBLURAY', TRUE, 1, 2),
+('INCEPTVHS', TRUE, 1, 3),
+('INCEPTVHS', TRUE, 1, 3),
+('KUMDVD', TRUE, 2, 1),
+('KUMDVD', TRUE, 2, 1),
+('KUMBLURAY', TRUE, 2, 2),
+('KUMBLURAY', TRUE, 2, 2);
 
 INSERT INTO clanovi (ime, adresa, telefon, email, clanski_broj) VALUES 
 ('Ivan Horvat', 'Ulica Kralja Zvonimira 10', '0912345678', 'ivan.horvat@example.com', 'CLAN12345'),
@@ -102,8 +113,15 @@ INSERT INTO clanovi (ime, adresa, telefon, email, clanski_broj) VALUES
 ('Marko Maric', 'Ulica Ivana Gundulića 5', '0912345680', 'marko.maric@example.com', 'CLAN12347'),
 ('Petra Novak', 'Ulica Stjepana Radića 8', '0912345681', 'petra.novak@example.com', 'CLAN12348');
 
-INSERT INTO posudba (datum_posudbe, datum_povrata, clan_id, zaliha_id) VALUES 
-('2024-06-09', '2024-06-13', 1, 1), -- tri dana zakasnine
-('2024-06-12', '2024-06-13', 2, 3), -- nema zakasnine
-('2024-06-12', '2024-06-15', 3, 5), -- dva dana zakasnine
-('2024-06-15', '2024-06-17', 4, 2); -- jedan dan zakasnine
+INSERT INTO posudba (datum_posudbe, datum_povrata, clan_id) VALUES 
+('2024-06-09', '2024-06-13', 1), -- tri dana zakasnine
+('2024-06-12', '2024-06-13', 2), -- nema zakasnine
+('2024-06-12', '2024-06-15', 3), -- dva dana zakasnine
+('2024-06-15', '2024-06-17', 4); -- jedan dan zakasnine
+
+INSERT INTO posudba_kopija (posudba_id, kopija_id)
+VALUES 
+(1, 1),
+(1, 3),
+(2, 6),
+(2, 8);

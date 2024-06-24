@@ -155,10 +155,78 @@ SELECT c.*, DATEDIFF(p.datum_povrata, p.datum_posudbe) - 1 AS "zakasnina"
 -- dohvati zapise iz filmova, preskoči prva 2 zapisa, dohvati sveukupno 3 zapisa
 SELECT * FROM filmovi LIMIT 2 OFFSET 3;  -- može i sa LIMIT 3, 2 -> obrnuto je kod korištenja sa zarezom
 
--- dohvati prosječnu cijenu filmova s obzirom na ukupnu zalihu filmova
-
-
 -- if klauzula
 SELECT *, IF (dostupna = TRUE, 'dostupna', 'nema je') AS dostupna
     FROM kopija;
 
+-- dohvati količinu svih filmova na određenom mediju
+SELECT f.naslov, COUNT(f.id) 
+	FROM kopija k
+	JOIN filmovi f ON k.film_id = f.id
+    JOIN mediji m ON k.medij_id = m.id
+    WHERE m.tip = 'DVD' AND k.dostupan = 1
+    GROUP BY f.id;
+
+-- dohvati količinu filmova po svakom mediju za film ID 1 (uz konkateniranje rezultata)
+SELECT CONCAT(m.tip, ' ', COUNT(f.id)) 
+	FROM kopija k
+	JOIN filmovi f ON k.film_id = f.id
+    JOIN mediji m ON k.medij_id = m.id
+    WHERE f.id = 1 AND k.dostupan = 1
+    GROUP BY m.id;
+
+-- za svaki film u bazi dohvatiti količinu filmova po mediju
+SELECT f.naslov, m.tip, COUNT(f.id) AS 'kolicina'
+	FROM kopija k
+	JOIN filmovi f ON k.film_id = f.id
+    JOIN mediji m ON k.medij_id = m.id
+    WHERE k.dostupan = 1
+    GROUP BY f.id, m.id;
+
+-- dohvati prosječnu cijenu filmova s obzirom na ukupnu zalihu filmova
+SELECT f.naslov, COUNT(k.id) AS 'broj kopija', ROUND(AVG(c.cijena * m.koeficijent), 2) AS 'prosjecna cijena'
+    FROM kopija k
+    JOIN filmovi f ON k.film_id = f.id
+    JOIN cjenik c ON c.id = f.cjenik_id
+    JOIN mediji m ON k.medij_id = m.id
+    WHERE k.dostupan = 1
+    GROUP BY f.id;
+
+-- izlistati posudbe sa imenom člana i nazivom filma
+SELECT p.*, c.ime, f.naslov 
+    FROM posudba p
+    JOIN clanovi c ON c.id = p.clan_id
+    JOIN posudba_kopija pk ON p.id = pk.posudba_id
+    JOIN kopija k ON k.id = pk.kopija_id
+    JOIN filmovi f ON f.id = k.film_id;
+
+SELECT p.*, c.ime, IFNULL(f.naslov, 'nema posudbe') -- primjer korištenja IFNULL fukcije (na loš način)
+    FROM posudba p
+    JOIN clanovi c ON c.id = p.clan_id
+    LEFT JOIN posudba_kopija pk ON p.id = pk.posudba_id
+    LEFT JOIN kopija k ON k.id = pk.kopija_id
+    LEFT JOIN filmovi f ON f.id = k.film_id;
+
+-- korištenje IF funkcije
+SELECT f.naslov, m.tip, COUNT(k.id) AS 'broj kopija', IF (COUNT(k.id) > 2, 'dovoljno na zalihi', 'nedovoljno na zalihi')
+	FROM kopija k
+	JOIN filmovi f ON k.film_id = f.id
+    JOIN mediji m ON k.medij_id = m.id
+    WHERE k.dostupan = 1
+    GROUP BY f.id, m.id
+    ORDER BY f.naslov;
+
+-- korištenje CASE strukture toka
+SELECT f.naslov, m.tip, COUNT(k.id) AS broj_kopija, 
+	CASE 
+    	WHEN COUNT(k.id) = 0 THEN 'nema na zalihi'
+        WHEN COUNT(k.id) <= 2 THEN 'mala zaliha'
+        WHEN COUNT(k.id) > 2 THEN 'dovoljna zaliha'
+        ELSE 'nemamo podatak'
+    END AS STANJE
+	FROM kopija k
+	JOIN filmovi f ON k.film_id = f.id
+    JOIN mediji m ON k.medij_id = m.id
+    WHERE k.dostupan = 1
+    GROUP BY f.id, m.id
+    ORDER BY f.naslov;
