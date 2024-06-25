@@ -9,10 +9,10 @@ VALUES ('Deadpool 3', '2024', 2, 2);
 SET @new_film_id = LAST_INSERT_ID();
 
 -- Insert stock information
-INSERT INTO kopija (film_id, medij_id, kolicina) 
+INSERT INTO kopija (barcode, dostupan, film_id, medij_id) 
 VALUES 
-(@new_film_id, 1, 10), 
-(@new_film_id, 2, 5),
-(@new_film_id, 3, 15);
+('DEAD3DVD', 1, @new_film_id, 1), 
+('DEAD3BR', 1, @new_film_id, 2),
+('DEAD3VHS', 1, @new_film_id, 3);
 
 COMMIT; -- kod begin/begin work završavamo sa end
