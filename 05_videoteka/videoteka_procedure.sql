@@ -1,13 +1,11 @@
-
+-- procedura za stvaranje nove posudbe
 DELIMITER $$
 
-CREATE PROCEDURE create_posudba(
+CREATE PROCEDURE IF NOT EXISTS create_posudba(
     IN p_clan_id INT UNSIGNED,
     IN p_kopija_id INT UNSIGNED
 )
-
 BEGIN
-
     DECLARE v_posudba_id INT UNSIGNED;
     DECLARE v_kolicina INT;
 
@@ -24,7 +22,7 @@ BEGIN
             AND k.dostupan = 1
             AND f.naslov = 'Inception'
         GROUP BY f.id
-    FOR UPDATE;
+        FOR UPDATE; -- race condition
 
     IF v_kolicina > 0 THEN
         -- Insert the new borrowing record
@@ -49,11 +47,60 @@ BEGIN
         ROLLBACK;
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Not enough stock available';
     END IF;
-    
 END $$
 
 DELIMITER ;
 
-
+-- poziv procedure
 -- (clan_id, kopija_id)
 CALL create_posudba(1, 2);
+
+
+
+
+
+-- procedura za popravak stanja dostupnih kopija filma u odnosu na posudbe
+DELIMITER $$
+
+CREATE PROCEDURE IF NOT EXISTS update_kopija()
+BEGIN
+    UPDATE kopija 
+        SET dostupan = 0
+    WHERE id IN (
+        SELECT kopija_id  -- primjer podupita
+        FROM posudba_kopija
+    );
+END $$
+
+DELIMITER ;
+
+CALL update_kopija();
+
+
+
+
+
+-- procedura za ispis prosjecne cijene filma
+DELIMITER $$
+
+CREATE PROCEDURE IF NOT EXISTS calculate_prosjecna_cijena()
+BEGIN
+    SELECT
+        f.naslov,
+        COUNT(k.id) AS 'Broj kopija',
+        IFNULL(ROUND(AVG(CASE WHEN k.dostupan = 1 THEN  c.cijena * m.koeficijent END), 2), 0) AS prosjecna_cijena_dostupan,
+        IFNULL(ROUND(AVG(CASE WHEN k.dostupan = 0 THEN c.cijena * m.koeficijent END), 2), 0) AS prosjecna_cijena_nedostupan
+    FROM kopija k
+        JOIN filmovi f ON k.film_id = f.id
+        JOIN cjenik c ON c.id = f.cjenik_id
+        JOIN mediji m ON k.medij_id = m.id
+    GROUP BY f.id
+    ORDER BY f.id;
+END $$
+
+DELIMITER ;
+
+CALL calculate_prosjecna_cijena();
+
+-- brisanje procedure
+DROP PROCEDURE IF EXISTS calculate_prosjecna_cijena;

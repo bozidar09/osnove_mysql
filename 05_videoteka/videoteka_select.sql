@@ -230,3 +230,42 @@ SELECT f.naslov, m.tip, COUNT(k.id) AS broj_kopija,
     WHERE k.dostupan = 1
     GROUP BY f.id, m.id
     ORDER BY f.naslov;
+
+-- korištenje MAX funkcije (ima i MIN) i primjer selektiranja iz pogleda (VIEW)
+SELECT 
+    MAX(dostupne_kopije) AS 'najvise kopija'
+    MAX(godina_filma) AS 'najnoviji film'
+    FROM available_movies;
+
+-- korištenje REPLACE funkcije
+SELECT REPLACE(adresa, ' ', '_') 
+    FROM clanovi;
+
+UPDATE clanovi
+    SET adresa = REPLACE(adresa, ' ', '_');
+
+-- vremenske funkcije
+SELECT
+    NOW() AS trenutno_vrijeme_datum,
+    CURTIME() AS trenutno_vrijeme,
+    CURDATE() AS trenutni_datum,
+    CURRENT_TIMESTAMP;
+
+SELECT
+    DATE_FORMAT(p.datum_posudbe, '%d.%m.%Y.') AS formatirani_datum_posudbe,
+    MONTHNAME(p.datum_posudbe) AS ime_mjeseca,
+    MONTH(p.datum_posudbe) AS mjesec,
+    YEAR(p.datum_posudbe) AS godina,
+    DATE(p.datum_posudbe) AS datum,
+    TIME(p.updated_at) AS vrijeme,
+    DAY(p.updated_at) AS dan,
+    HOUR(p.updated_at) AS sat,
+    MINUTE(p.updated_at) AS minuta,
+    SECOND(p.updated_at) AS sekunda,
+    DATEDIFF(p.updated_at, p.datum_posudbe) AS datum_vece_manje,
+    DATEDIFF(p.datum_posudbe, p.updated_at) AS datum_manje_vece,
+    DATE_ADD(p.datum_posudbe, INTERVAL 1 DAY) AS dodaj_dan,
+    DATE_SUB(p.datum_posudbe, INTERVAL 1 MONTH) AS oduzmi_mjesec,
+    TIMESTAMPDIFF(MINUTE, p.updated_at, NOW()) razlika_u_minutama
+FROM
+    posudba p;
