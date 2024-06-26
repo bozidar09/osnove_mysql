@@ -9,12 +9,12 @@ BEGIN
     DECLARE v_posudba_id INT UNSIGNED;
     DECLARE v_kolicina INT;
 
-    -- Start transaction
+-- početak transakcije
     START TRANSACTION;
 
-    -- Ensure the film copy is available
+-- provjera je li kopija dostupna
     SELECT count(f.id)
-        INTO v_kolicina
+        INTO v_kolicina -- pohranjujemo rezultat u varijablu v_kolicina
         FROM kopija k
         JOIN filmovi f ON k.film_id = f.id
         JOIN mediji m ON k.medij_id = m.id
@@ -22,28 +22,28 @@ BEGIN
             AND k.dostupan = 1
             AND f.naslov = 'Inception'
         GROUP BY f.id
-        FOR UPDATE; -- race condition
+        FOR UPDATE; -- race condition (osigurava da nema stranih upisa u navedene tablice, zaključava ih dok se ne izvrši naša transakcija)
 
+-- insert nove posudbe ako postoji dostupna kopija
     IF v_kolicina > 0 THEN
-        -- Insert the new borrowing record
         INSERT INTO posudba (datum_posudbe, clan_id)
         VALUES (CURDATE(), p_clan_id);
 
-        SET v_posudba_id = LAST_INSERT_ID();
+        SET v_posudba_id = LAST_INSERT_ID(); -- spremanje posljednje unesenog id (posudba.id) u varijablu v_posudba_id
 
-        -- Insert the kopija into posudba_kopija
+-- insert podataka u veznu tablicu posudba_kopija
         INSERT INTO posudba_kopija (posudba_id, kopija_id)
         VALUES (v_posudba_id, p_kopija_id);
 
-        -- Update the availability of the kopija
+-- update dostupnosti kopije
         UPDATE kopija
         SET dostupan = 0
         WHERE id = p_kopija_id;
 
-        -- Commit the transaction
+-- izvršavanje transakcije
         COMMIT;
     ELSE
-        -- If a film copy is not available, rollback the transaction
+-- ako kopija nije dostupna otkazujemo izvršavanje transakcije i javljamo grešku
         ROLLBACK;
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Not enough stock available';
     END IF;
@@ -87,12 +87,12 @@ CREATE PROCEDURE IF NOT EXISTS calculate_prosjecna_cijena()
 BEGIN
     SELECT
         f.naslov,
-        COUNT(k.id) AS 'Broj kopija',
+        COUNT(k.id) AS broj_kopija,
         IFNULL(ROUND(AVG(CASE WHEN k.dostupan = 1 THEN  c.cijena * m.koeficijent END), 2), 0) AS prosjecna_cijena_dostupan,
         IFNULL(ROUND(AVG(CASE WHEN k.dostupan = 0 THEN c.cijena * m.koeficijent END), 2), 0) AS prosjecna_cijena_nedostupan
     FROM kopija k
         JOIN filmovi f ON k.film_id = f.id
-        JOIN cjenik c ON c.id = f.cjenik_id
+        JOIN cjenik c ON f.cjenik_id = c.id
         JOIN mediji m ON k.medij_id = m.id
     GROUP BY f.id
     ORDER BY f.id;
