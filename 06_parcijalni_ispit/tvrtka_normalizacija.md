@@ -1,17 +1,17 @@
 
 ### Nenormalizirana tablica
 
-| Id  | Zaposlenik | Pozicija | Plaća | Voditelj | Odjel |
-| --- | ---------- | -------- | ----- | -------- | ----- |
+| Id  | Radnik | Pozicija | Plaća | Voditelj | Odjel |
+| --- | ------ | -------- | ----- | -------- | ----- |
 
 
 
 ## 1 NF
 
-### Zaposlenik
+### Radnik
 
-| Id  | Zaposlenik | Pozicija | Plaća | Ime | OIB | Adresa | Telefon | Datum_zaposlenja |
-| --- | ---------- | -------- | ----- | --- | --- | ------ | ------- | ---------------- | 
+| Id  | Pozicija | Plaća | Ime | OIB | Adresa | Telefon | Datum_zaposlenja |
+| --- | -------- | ----- | --- | --- | ------ | ------- | ---------------- | 
 
 
 ### Odjel
@@ -23,22 +23,16 @@
 
 ## 2 NF
 
-### Zaposlenik
+### Radnik
 
 | Id  | Ime | OIB | Adresa | Telefon | Datum_zaposlenja |
 | --- | --- | --- | ------ | ------- | ---------------- | 
 
 
-### Plaća
-
-| Id  | Osnovica | Zaposlenik_id | Datum_od | Datum_do | 
-| --- | -------- | ------------- | -------- | -------- | 
-
-
 ### Pozicija
 
-| Id  | Naziv | Koeficijent | Datum_od | Datum_do | 
-| --- | ----- | ----------- | -------- | -------- |
+| Id  | Naziv | Plaća | Max_iznos | Min_iznos | 
+| --- | ----- | ----- | --------- | --------- |
 
 
 ### Odjel
@@ -50,7 +44,7 @@
 
 ## 3 NF
 
-### Zaposlenik
+### Radnik
 
 | Id  | Ime | OIB | Adresa | Telefon | Datum_zaposlenja |
 | --- | --- | --- | ------ | ------- | ---------------- |
@@ -58,35 +52,23 @@
 
 ### Plaća
 
-| Id  | Osnovica | Zaposlenik_id | Datum_od | Datum_do | 
-| --- | -------- | ------------- | -------- | -------- | 
+| Id  | Radnik_id | Pozicija_id | Iznos | Datum_od | Datum_do | 
+| --- | --------- | ----------- | ----- | -------- | -------- | 
 
 
 ### Pozicija
 
-| Id  | Naziv | Koeficijent | 
-| --- | ----- | ----------- |
+| Id  | Naziv | Max_iznos | Min_iznos | 
+| --- | ----- | --------- | --------- |
 
 
-### Pozicija_popis
+### Radnik_odjel
 
-| Id  | Zaposlenik_id | Pozicija_id | Datum_od | Datum_do | 
-| --- | ------------- | ----------- | -------- | -------- |
+| Id  | Radnik_id | Odjel_id | Voditelj | Datum_od | Datum_do | 
+| --- | --------- | -------- | -------- | -------- | -------- |
 
 
 ### Odjel
 
 | Id  | Naziv | 
 | --- | ----- |
-
-
-### Odjel_zaposlenik
-
-| Id  | Odjel_id | Zaposlenik_id | Datum_od | Datum_do | 
-| --- | -------- | ------------- | -------- | -------- |
-
-
-### Voditelj
-
-| Id  | Odjel_id | Zaposlenik_id | Datum_od | Datum_do | 
-| --- | -------- | ------------- | -------- | -------- |

@@ -1,24 +1,21 @@
 
--- dohvatite sve zaposlenike i njihove plaće (dodajemo i poziciju)
+-- dohvatite sve radnike i njihove plaće (dodajemo i poziciju)
 -- primjer stvaranja pogleda
-CREATE OR REPLACE VIEW zaposlenik_placa AS
+CREATE OR REPLACE VIEW radnik_placa AS
     SELECT
-        z.ime AS zaposlenik,
+        r.ime AS radnik,
         pz.naziv AS pozicija,
-        ROUND(SUM(pl.osnovica * pz.koeficijent), 2) AS ukupna_placa
-    FROM zaposlenik z
-        JOIN odjel_zaposlenik oz ON oz.zaposlenik_id = z.id
-        JOIN placa pl ON pl.zaposlenik_id = z.id
-        JOIN pozicija_popis pp ON pp.zaposlenik_id = z.id
-        JOIN pozicija pz ON pp.pozicija_id = pz.id
-    WHERE oz.datum_do IS NULL AND pl.datum_do IS NULL AND pp.datum_do IS NULL  -- filtriramo trenutne odjele/plaće/pozicije
-    GROUP BY z.id, pz.id 
-    ORDER BY ukupna_placa DESC;
+        pl.iznos AS placa
+    FROM radnik r
+        JOIN placa pl ON pl.radnik_id = r.id
+        JOIN pozicija pz ON pl.pozicija_id = pz.id
+    WHERE pl.datum_do IS NULL  -- filtriramo trenutne plaće
+    ORDER BY placa DESC;
 
 -- prikaz svih podataka iz pogleda
-SELECT * FROM zaposlenik_placa;
+SELECT * FROM radnik_placa;
 --brisanje pogleda
-DROP VIEW IF EXISTS zaposlenik_placa;
+DROP VIEW IF EXISTS radnik_placa;
 
 
 
@@ -26,44 +23,41 @@ DROP VIEW IF EXISTS zaposlenik_placa;
 -- primjer stvaranja procedure
 DELIMITER $$
 
-CREATE PROCEDURE IF NOT EXISTS izracun_voditelj_placa()
+CREATE PROCEDURE IF NOT EXISTS voditelj_prosjek_placa()
 BEGIN
     SELECT
-        COUNT(DISTINCT(z.id)) AS 'Ukupno voditelja', -- koristimo DISTINCT() kako nebi više puta brojali one koji su voditelji više od jednog odjela (ako bi takvi postojali)
-        ROUND((SUM(pl.osnovica * pz.koeficijent) / COUNT(DISTINCT(z.id))), 2) AS 'Prosjek placa' -- ne koristimo AVG() jer bi on podjelio ukupan zbroj plaća sa ukupnim brojem redaka (bez DISTINCT())
-    FROM zaposlenik z
-        JOIN voditelj v ON v.zaposlenik_id = z.id
-        JOIN placa pl ON pl.zaposlenik_id = z.id
-        JOIN pozicija_popis pp ON pp.zaposlenik_id = z.id
-        JOIN pozicija pz ON pp.pozicija_id = pz.id
-    WHERE v.datum_do IS NULL AND pl.datum_do IS NULL AND pp.datum_do IS NULL;
+        COUNT(r.id) AS broj_voditelja, 
+        ROUND((SUM(pl.iznos) / COUNT(r.id)), 2) AS prosjek_placa
+    FROM radnik r
+        JOIN radnik_odjel ro ON ro.radnik_id = r.id 
+        JOIN placa pl ON pl.radnik_id = r.id
+        JOIN pozicija pz ON pl.pozicija_id = pz.id
+    WHERE pl.datum_do IS NULL AND ro.datum_do IS NULL AND ro.voditelj = TRUE;  -- selekcioniramo voditelje su zaposleni i primaju plaću
 END $$
 
 DELIMITER ;
 
 -- poziv procedure
-CALL izracun_voditelj_placa();
+CALL voditelj_prosjek_placa();
 -- brisanje procedure
-DROP PROCEDURE IF EXISTS izracun_voditelj_placa;
+DROP PROCEDURE IF EXISTS voditelj_prosjek_placa;
 
 
 
--- kreirajte proceduru koja će računati prosjek plaća svih zaposlenika
+-- kreirajte proceduru koja će računati prosjek plaća svih radnika
 DELIMITER $$
 
-CREATE PROCEDURE IF NOT EXISTS izracun_prosjecna_placa()
+CREATE PROCEDURE IF NOT EXISTS radnik_prosjek_placa()
 BEGIN
     SELECT
-        COUNT(DISTINCT(z.id)) AS 'Ukupno zaposlenika', -- ponovno koristimo DISTINCT() kako nebi više puta brojali one zaposlenike koji su zaposleni u više od jednog odjela
-        ROUND((SUM(pl.osnovica * pz.koeficijent) / COUNT(DISTINCT(z.id))), 2) AS 'Prosjek placa' -- ne koristimo AVG() jer bi on podjelio ukupan zbroj plaća sa ukupnim brojem redaka (bez DISTINCT())
-    FROM zaposlenik z
-        JOIN odjel_zaposlenik oz ON oz.zaposlenik_id = z.id
-        JOIN placa pl ON pl.zaposlenik_id = z.id
-        JOIN pozicija_popis pp ON pp.zaposlenik_id = z.id
-        JOIN pozicija pz ON pp.pozicija_id = pz.id
-    WHERE oz.datum_do IS NULL AND pl.datum_do IS NULL AND pp.datum_do IS NULL;
+        (SELECT COUNT(DISTINCT(ro.radnik_id)) FROM radnik_odjel ro WHERE ro.datum_do IS NULL) AS broj_radnika, -- u podupitu koristimo DISTINCT() kako ne bi više puta brojali one zaposlenike koji su zaposleni u više od jednog odjela
+        ROUND(AVG(pl.iznos), 2) AS prosjek_placa
+    FROM radnik r
+        JOIN placa pl ON pl.radnik_id = r.id
+        JOIN pozicija pz ON pl.pozicija_id = pz.id
+    WHERE pl.datum_do IS NULL;
 END $$
 
 DELIMITER ;
 
-CALL izracun_prosjecna_placa();
+CALL radnik_prosjek_placa();
