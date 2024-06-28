@@ -9,7 +9,7 @@ CREATE OR REPLACE VIEW radnik_placa AS
     FROM radnik r
         JOIN placa pl ON pl.radnik_id = r.id
         JOIN pozicija pz ON pl.pozicija_id = pz.id
-    WHERE pl.datum_do IS NULL  -- filtriramo trenutne plaće
+    WHERE pl.datum_do IS NULL  -- filtriramo plaće trenutno zaposlenih radnika
     ORDER BY placa DESC;
 
 -- prikaz svih podataka iz pogleda
@@ -32,7 +32,7 @@ BEGIN
         JOIN radnik_odjel ro ON ro.radnik_id = r.id 
         JOIN placa pl ON pl.radnik_id = r.id
         JOIN pozicija pz ON pl.pozicija_id = pz.id
-    WHERE pl.datum_do IS NULL AND ro.datum_do IS NULL AND ro.voditelj = TRUE;  -- selekcioniramo voditelje su zaposleni i primaju plaću
+    WHERE pl.datum_do IS NULL AND ro.datum_do IS NULL AND ro.voditelj = TRUE;  -- filtriramo voditelje koji trenutno vode odjel i primaju plaću
 END $$
 
 DELIMITER ;
