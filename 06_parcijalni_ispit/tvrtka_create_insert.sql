@@ -9,7 +9,7 @@ CREATE DATABASE IF NOT EXISTS tvrtka DEFAULT CHARACTER SET utf8mb4 COLLATE utf8m
 
 USE tvrtka;
 
-CREATE TABLE IF NOT EXISTS zaposlenik (
+CREATE TABLE IF NOT EXISTS radnik (
     id INT UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
     oib CHAR(14) NOT NULL UNIQUE,
     ime VARCHAR(100) NOT NULL,
@@ -18,27 +18,20 @@ CREATE TABLE IF NOT EXISTS zaposlenik (
     datum_zaposlenja DATE NOT NULL
 )ENGINE=InnoDB;
 
-CREATE TABLE IF NOT EXISTS placa (
-    id INT UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
-    zaposlenik_id INT UNSIGNED NOT NULL,
-    FOREIGN KEY (zaposlenik_id) REFERENCES zaposlenik(id),
-    osnovica DECIMAL(10,2) NOT NULL,
-    datum_od DATE NOT NULL,
-    datum_do DATE
-)ENGINE=InnoDB;
-
 CREATE TABLE IF NOT EXISTS pozicija (
     id INT UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
     naziv VARCHAR(100) NOT NULL,
-    koeficijent FLOAT NOT NULL
+    max_iznos DECIMAL(10,2) NOT NULL,
+    min_iznos DECIMAL(10,2) NOT NULL
 )ENGINE=InnoDB;
 
-CREATE TABLE IF NOT EXISTS pozicija_popis (
+CREATE TABLE IF NOT EXISTS placa (
     id INT UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
-    zaposlenik_id INT UNSIGNED NOT NULL,
-    FOREIGN KEY (zaposlenik_id) REFERENCES zaposlenik(id),
+    radnik_id INT UNSIGNED NOT NULL,
+    FOREIGN KEY (radnik_id) REFERENCES radnik(id),
     pozicija_id INT UNSIGNED NOT NULL,
     FOREIGN KEY (pozicija_id) REFERENCES pozicija(id),
+    iznos DECIMAL(10,2) NOT NULL,
     datum_od DATE NOT NULL,
     datum_do DATE
 )ENGINE=InnoDB;
@@ -48,22 +41,13 @@ CREATE TABLE IF NOT EXISTS odjel (
     naziv VARCHAR(100) NOT NULL UNIQUE
 )ENGINE=InnoDB;
 
-CREATE TABLE IF NOT EXISTS odjel_zaposlenik (
+CREATE TABLE IF NOT EXISTS odjel_radnik (
     id INT UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
     odjel_id INT UNSIGNED NOT NULL,
     FOREIGN KEY (odjel_id) REFERENCES odjel(id),
-    zaposlenik_id INT UNSIGNED NOT NULL,
-    FOREIGN KEY (zaposlenik_id) REFERENCES zaposlenik(id),
-    datum_od DATE NOT NULL,
-    datum_do DATE
-)ENGINE=InnoDB;
-
-CREATE TABLE IF NOT EXISTS voditelj (
-    id INT UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
-    odjel_id INT UNSIGNED NOT NULL,
-    FOREIGN KEY (odjel_id) REFERENCES odjel(id),
-    zaposlenik_id INT UNSIGNED NOT NULL,
-    FOREIGN KEY (zaposlenik_id) REFERENCES zaposlenik(id),
+    radnik_id INT UNSIGNED NOT NULL,
+    FOREIGN KEY (radnik_id) REFERENCES radnik(id),
+    voditelj BOOLEAN DEFAULT FALSE,
     datum_od DATE NOT NULL,
     datum_do DATE
 )ENGINE=InnoDB;
