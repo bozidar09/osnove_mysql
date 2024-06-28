@@ -116,6 +116,7 @@ SELECT
 SELECT c.id, c.ime AS 'clan', COUNT(*) AS "broj posudbi" -- može i sa COUNT(c.id) jer broji retke
     FROM posudba p
     JOIN clanovi c ON p.clan_id = c.id
+    JOIN posudba_kopija pk ON pk.posudba_id = p.id
     GROUP BY c.id
     HAVING COUNT(*) > 1;
 
@@ -280,3 +281,28 @@ SELECT
     TIMESTAMPDIFF(MINUTE, p.updated_at, NOW()) razlika_u_minutama
 FROM
     posudba p;
+
+-- dohvati 3 najpopularnija filma posuđena u nekom vremenskom roku
+SELECT 
+    f.naslov AS naslov_filma,
+    f.godina AS godina_filma,
+    z.ime AS zanr, 
+    COUNT(f.id) AS broj_posudbi 
+FROM posudba_kopija pk 
+    JOIN posudba ps ON pk.posudba_id = ps.id
+    JOIN kopija k ON pk.kopija_id = k.id 
+    JOIN mediji m ON k.medij_id = m.id
+    JOIN filmovi f ON k.film_id = f.id
+    JOIN zanrovi z ON f.zanr_id = z.id
+WHERE ps.datum_posudbe > '2024-01-01'
+GROUP BY f.id
+ORDER BY COUNT(f.id) DESC
+LIMIT 3;
+
+-- dohvati filmove po žanrovima
+SELECT 
+    f.naslov AS naslov_filma,
+    z.ime AS zanr,  
+FROM filmovi f 
+    JOIN zanrovi z ON f.zanr_id = z.id
+GROUP BY z.ime;
