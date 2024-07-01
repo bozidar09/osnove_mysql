@@ -26,8 +26,8 @@ DELIMITER $$
 CREATE PROCEDURE IF NOT EXISTS voditelj_prosjek_placa()
 BEGIN
     SELECT
-        COUNT(r.id) AS broj_voditelja, 
-        ROUND((SUM(pl.iznos) / COUNT(r.id)), 2) AS prosjek_placa
+        COUNT(DISTINCT(r.id)) AS broj_voditelja, 
+        ROUND(AVG(pl.iznos), 2) AS prosjek_placa
     FROM radnik r
         JOIN radnik_odjel ro ON ro.radnik_id = r.id 
         JOIN placa pl ON pl.radnik_id = r.id
